@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "aoc",
+    "challenges/day1",
+    "challenges/day2",
+    "challenges/day3",
+]
+default-members = [
+    "challenges/day3"
+]
+
+[workspace.dependencies]
+aoc = { path="aoc" }
