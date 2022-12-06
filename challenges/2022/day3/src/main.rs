@@ -1,14 +1,12 @@
 use std::{collections::HashSet, hash::Hash};
 
-
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Item {
-    character : char,
+    character: char,
 }
 
 impl Item {
-    pub fn new (character: char) -> Self {
+    pub fn new(character: char) -> Self {
         Self { character }
     }
 
@@ -22,11 +20,10 @@ impl Item {
 }
 
 pub struct Rucksack {
-    compartments: [Vec<Item>;2],
+    compartments: [Vec<Item>; 2],
 }
 
 impl Rucksack {
-
     pub fn compartment_from_str(string: &str) -> Vec<Item> {
         string.chars().map(|c| Item::new(c)).collect()
     }
@@ -34,29 +31,34 @@ impl Rucksack {
         assert!(string.len() % 2 == 0);
         Self {
             compartments: [
-                Self::compartment_from_str(&string[0..string.len()/2]),
-                Self::compartment_from_str(&string[string.len()/2..]),
-            ]
+                Self::compartment_from_str(&string[0..string.len() / 2]),
+                Self::compartment_from_str(&string[string.len() / 2..]),
+            ],
         }
-
     }
     pub fn items_in_both(&self) -> HashSet<Item> {
-        self.compartments[0].iter().filter_map(|e|
-            if self.compartments[1].contains(e) {
-                Some(e.clone())
-            } else {
-                None
-            }
-        ).collect()
+        self.compartments[0]
+            .iter()
+            .filter_map(|e| {
+                if self.compartments[1].contains(e) {
+                    Some(e.clone())
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 
     pub fn all_item_types(&self) -> HashSet<Item> {
-        self.compartments[0].iter().chain(self.compartments[1].iter()).cloned().collect()
+        self.compartments[0]
+            .iter()
+            .chain(self.compartments[1].iter())
+            .cloned()
+            .collect()
     }
 }
 
-fn part1(input: &str)
-{
+fn part1(input: &str) {
     println!("Part1:");
     let mut priorities = 0;
     for line in input.lines() {
@@ -70,8 +72,7 @@ fn part1(input: &str)
     println!(" Total: {}", priorities);
 }
 
-fn part2(input: &str)
-{
+fn part2(input: &str) {
     println!("Part2:");
     let mut iter = input.lines();
     let mut priorities = 0;
@@ -79,12 +80,22 @@ fn part2(input: &str)
         let second = iter.next().unwrap();
         let third = iter.next().unwrap();
 
-        let rucksacks = (Rucksack::from_str(first),
+        let rucksacks = (
+            Rucksack::from_str(first),
             Rucksack::from_str(second),
-            Rucksack::from_str(third));
+            Rucksack::from_str(third),
+        );
 
-        let s0 : HashSet<Item> = rucksacks.0.all_item_types().intersection(&rucksacks.1.all_item_types()).cloned().collect();
-        let s1 : HashSet<Item> = s0.intersection(&rucksacks.2.all_item_types()).cloned().collect();
+        let s0: HashSet<Item> = rucksacks
+            .0
+            .all_item_types()
+            .intersection(&rucksacks.1.all_item_types())
+            .cloned()
+            .collect();
+        let s1: HashSet<Item> = s0
+            .intersection(&rucksacks.2.all_item_types())
+            .cloned()
+            .collect();
 
         assert_eq!(1, s1.len());
 

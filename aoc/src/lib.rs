@@ -3,4 +3,3 @@ pub fn load_input(base: &str, path: &str) -> String {
 
     std::fs::read_to_string(path).unwrap()
 }
-

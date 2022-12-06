@@ -1,5 +1,3 @@
-
-
 enum GameChoice {
     Rock,
     Paper,
@@ -20,7 +18,7 @@ impl GameChoice {
             "X" | "A" => GameChoice::Rock,
             "Y" | "B" => GameChoice::Paper,
             "Z" | "C" => GameChoice::Scissors,
-            _ => panic!("'{}' is invalid representation of GameChoice", s)
+            _ => panic!("'{}' is invalid representation of GameChoice", s),
         }
     }
 }
@@ -33,7 +31,7 @@ struct Round {
 enum Winner {
     Them,
     Us,
-    Tie
+    Tie,
 }
 
 impl Winner {
@@ -50,68 +48,52 @@ impl Winner {
             "X" | "A" => Winner::Them,
             "Y" | "B" => Winner::Tie,
             "Z" | "C" => Winner::Us,
-            _ => panic!("'{}' is invalid representation of Winner", s)
+            _ => panic!("'{}' is invalid representation of Winner", s),
         }
     }
 }
 impl Round {
     pub fn new(them: GameChoice, us: GameChoice) -> Self {
-        Self {
-            them, us
-        }
+        Self { them, us }
     }
 
     pub fn from_outcome(them: GameChoice, outcome: Winner) -> Self {
         let us = match &them {
-            GameChoice::Rock => {
-                match outcome {
-                    Winner::Them => GameChoice::Scissors,
-                    Winner::Us => GameChoice::Paper,
-                    Winner::Tie => GameChoice::Rock,
-                }
+            GameChoice::Rock => match outcome {
+                Winner::Them => GameChoice::Scissors,
+                Winner::Us => GameChoice::Paper,
+                Winner::Tie => GameChoice::Rock,
             },
-            GameChoice::Paper => {
-                match outcome {
-                    Winner::Them => GameChoice::Rock,
-                    Winner::Us => GameChoice::Scissors,
-                    Winner::Tie => GameChoice::Paper,
-                }
+            GameChoice::Paper => match outcome {
+                Winner::Them => GameChoice::Rock,
+                Winner::Us => GameChoice::Scissors,
+                Winner::Tie => GameChoice::Paper,
             },
-            GameChoice::Scissors => {
-                match outcome {
-                    Winner::Them => GameChoice::Paper,
-                    Winner::Us => GameChoice::Rock,
-                    Winner::Tie => GameChoice::Scissors,
-                }
+            GameChoice::Scissors => match outcome {
+                Winner::Them => GameChoice::Paper,
+                Winner::Us => GameChoice::Rock,
+                Winner::Tie => GameChoice::Scissors,
             },
         };
-        Self {
-            us, them
-        }
+        Self { us, them }
     }
 
     pub fn winner(&self) -> Winner {
         match self.us {
-            GameChoice::Rock => {
-                match self.them {
-                    GameChoice::Rock => Winner::Tie,
-                    GameChoice::Paper => Winner::Them,
-                    GameChoice::Scissors => Winner::Us,
-                }
+            GameChoice::Rock => match self.them {
+                GameChoice::Rock => Winner::Tie,
+                GameChoice::Paper => Winner::Them,
+                GameChoice::Scissors => Winner::Us,
             },
-            GameChoice::Paper => {
-                match self.them {
-                    GameChoice::Rock => Winner::Us,
-                    GameChoice::Paper => Winner::Tie,
-                    GameChoice::Scissors => Winner::Them,
-                }
+            GameChoice::Paper => match self.them {
+                GameChoice::Rock => Winner::Us,
+                GameChoice::Paper => Winner::Tie,
+                GameChoice::Scissors => Winner::Them,
             },
-            GameChoice::Scissors => {
-                match self.them {
-                    GameChoice::Rock => Winner::Them,
-                    GameChoice::Paper => Winner::Us,
-                    GameChoice::Scissors => Winner::Tie,
-                }
+            GameChoice::Scissors => match self.them {
+                GameChoice::Rock => Winner::Them,
+                GameChoice::Paper => Winner::Us,
+                GameChoice::Scissors => Winner::Tie,
             },
         }
     }
@@ -122,7 +104,6 @@ impl Round {
 }
 
 fn main() {
-    
     let input = aoc::load_input(env!("CARGO_MANIFEST_DIR"), "input.txt");
 
     println!("Part1:");
@@ -133,7 +114,6 @@ fn main() {
         let round = Round::new(GameChoice::from_str(them), GameChoice::from_str(us));
 
         total = total + round.points();
-
     }
     println!("Total: {}", total);
 
@@ -145,7 +125,6 @@ fn main() {
         let round = Round::from_outcome(GameChoice::from_str(them), Winner::from_str(us));
 
         total = total + round.points();
-
     }
     println!("Total: {}", total);
 }
