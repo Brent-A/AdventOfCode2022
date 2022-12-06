@@ -3,7 +3,7 @@ use std::{collections::HashSet, hash::Hash};
 
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Item {
+pub struct Item {
     character : char,
 }
 
@@ -21,7 +21,7 @@ impl Item {
     }
 }
 
-struct Rucksack {
+pub struct Rucksack {
     compartments: [Vec<Item>;2],
 }
 
