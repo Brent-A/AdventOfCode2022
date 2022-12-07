@@ -1,35 +1,13 @@
+#![feature(drain_filter)]
+use std::collections::HashMap;
+
+use aoc::GetOrDefault;
 use scan_fmt::scan_fmt;
 use serde_derive::Deserialize;
 
-trait GetOrDefault<T>
-where
-    T: Default,
-{
-    fn get_or_default(&mut self, index: usize) -> &T;
-    fn get_mut_or_default(&mut self, index: usize) -> &mut T;
-}
-
-impl<T> GetOrDefault<T> for Vec<T>
-where
-    T: Default,
-{
-    fn get_or_default(&mut self, index: usize) -> &T {
-        while self.len() < index + 1 {
-            self.push(T::default());
-        }
-        self.get(index).unwrap()
-    }
-    fn get_mut_or_default(&mut self, index: usize) -> &mut T {
-        while self.len() < index + 1 {
-            self.push(T::default());
-        }
-        self.get_mut(index).unwrap()
-    }
-}
 
 fn part1(input: &str) -> String {
-    let mut m = HashMap::new();
-
+    
     let mut bitcount: Vec<usize> = Vec::new();
     let mut count = 0;
 
@@ -41,7 +19,7 @@ fn part1(input: &str) -> String {
                 *c += 1;
             }
         }
-        count += 1;
+        count +=1;
     }
 
     let mut gamma = "".to_string();
@@ -63,14 +41,100 @@ fn part1(input: &str) -> String {
 }
 
 fn part2(input: &str) -> String {
-    "".to_string()
+    
+    let mut bitcount: Vec<usize> = Vec::new();
+    let mut count = 0;
+
+    let mut values = Vec::new();
+
+    for line in input.lines() {
+        for (i, bit) in line.chars().enumerate() {
+            let c = bitcount.get_mut_or_default(i);
+
+            if bit == '1' {
+                *c += 1;
+            }
+        }
+        values.push(line.to_string());
+        count +=1;
+        
+    }
+
+    let mut o2values = values.clone();
+    let mut co2values = values.clone();
+
+    let mut index = 0;
+    while o2values.len() > 1 {
+        bitcount.clear();
+        count = 0;
+
+        for value in &o2values {
+            for (i, bit) in value.chars().enumerate() {
+                let c = bitcount.get_mut_or_default(i);
+
+                if bit == '1' {
+                    *c += 1;
+                }
+            }
+            count = count + 1;
+        }
+
+        let bit = bitcount.iter().nth(index).unwrap();
+
+        if *bit > count / 2 {
+            o2values.drain_filter(|e| e.chars().nth(index).unwrap() == '0');
+        } else {
+            o2values.drain_filter(|e| e.chars().nth(index).unwrap() == '1');
+        }
+
+        println!("kept {}", o2values.len());
+        index += 1;
+    }
+
+    
+    println!("o2value: {}", o2values[0]);
+    index = 0;
+    while co2values.len() > 1 {
+        bitcount.clear();
+        count = 0;
+
+        for value in &co2values {
+            for (i, bit) in value.chars().enumerate() {
+                let c = bitcount.get_mut_or_default(i);
+
+                if bit == '1' {
+                    *c += 1;
+                }
+            }
+            count = count + 1;
+        }
+
+        
+        let bit = bitcount.iter().nth(index).unwrap();
+
+        if *bit <= count / 2 {
+            co2values.drain_filter(|e| e.chars().nth(index).unwrap() == '0');
+        } else {
+            co2values.drain_filter(|e| e.chars().nth(index).unwrap() == '1');
+        }
+
+        println!("kept {:?}", co2values);
+        index += 1;
+    }
+
+    println!("co2value: {}", co2values[0]);
+
+    let gamma_val = u32::from_str_radix(&o2values[0], 2).unwrap();
+    let epsion_val = u32::from_str_radix(&co2values[0], 2).unwrap();
+
+    (gamma_val * epsion_val).to_string()
 }
 
 fn main() {
     let example_input = aoc::load_input(env!("CARGO_MANIFEST_DIR"), "sample.txt");
 
     let expected_example_part1 = "198";
-    let expected_example_part2 = "?";
+    let expected_example_part2 = "230";
 
     println!("AOC 2021 Day 3");
     println!("Sample Part 1:");
