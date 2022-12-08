@@ -5,6 +5,13 @@ pub struct Position {
     orientation: Option<Direction>,
 }
 
+pub const EACH_DIRECTION: [Direction; 4] = [
+    Direction::Up,
+    Direction::Down,
+    Direction::Left,
+    Direction::Right,
+];
+
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Direction {
     Up,
@@ -14,6 +21,14 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub fn opposite(&self) -> Self {
+        match self {
+            Direction::Up => Direction::Down,
+            Direction::Down => Direction::Up,
+            Direction::Left => Direction::Right,
+            Direction::Right => Direction::Left,
+        }
+    }
     pub fn as_char(&self) -> char {
         match self {
             Direction::Up => '^',
@@ -22,7 +37,34 @@ impl Direction {
             Direction::Right => '>',
         }
     }
+    pub fn rotate(&self, rotation: Rotation) -> Direction {
+        match self {
+            Direction::Up => match rotation {
+                Rotation::Left => Direction::Left,
+                Rotation::Right => Direction::Right,
+            },
+            Direction::Right => match rotation {
+                Rotation::Left => Direction::Up,
+                Rotation::Right => Direction::Down,
+            },
+            Direction::Down => match rotation {
+                Rotation::Left => Direction::Right,
+                Rotation::Right => Direction::Left,
+            },
+            Direction::Left => match rotation {
+                Rotation::Left => Direction::Down,
+                Rotation::Right => Direction::Up,
+            },
+        }
+    }
 }
+
+pub const EACH_MOVEMENT: [Movement; 4] = [
+    Movement::Forward,
+    Movement::Back,
+    Movement::Left,
+    Movement::Right,
+];
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Movement {
@@ -31,6 +73,8 @@ pub enum Movement {
     Right,
     Back,
 }
+
+pub const EACH_ROTATION: [Rotation; 2] = [Rotation::Left, Rotation::Right];
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Rotation {
@@ -122,25 +166,7 @@ impl Position {
     }
 
     pub fn rotate(&self, rotation: Rotation) -> Self {
-        let new_orientation = match self.orientation {
-            Some(Direction::Up) => match rotation {
-                Rotation::Left => Direction::Left,
-                Rotation::Right => Direction::Right,
-            },
-            Some(Direction::Right) => match rotation {
-                Rotation::Left => Direction::Up,
-                Rotation::Right => Direction::Down,
-            },
-            Some(Direction::Down) => match rotation {
-                Rotation::Left => Direction::Right,
-                Rotation::Right => Direction::Left,
-            },
-            Some(Direction::Left) => match rotation {
-                Rotation::Left => Direction::Down,
-                Rotation::Right => Direction::Up,
-            },
-            None => panic!("Position has no orientation"),
-        };
+        let new_orientation = self.orientation.unwrap().rotate(rotation);
         Self {
             row: self.row,
             col: self.col,

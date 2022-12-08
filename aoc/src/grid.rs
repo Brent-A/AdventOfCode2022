@@ -85,8 +85,23 @@ impl<T> Grid<T> {
             .flat_map(move |r| self.col_range().map(move |c| Position::new(r, c)))
     }
 
+    pub fn valid_position(&self, position: &Position) -> bool {
+        self.row_range().contains(&position.row()) && self.col_range().contains(&position.col())
+    }
+
     pub fn tiles(&self) -> impl Iterator<Item = &T> {
         self.tiles.iter().flat_map(|r| r.iter())
+    }
+
+    pub fn edge_positions(&self, edge: Direction) -> Box<dyn Iterator<Item = Position>> {
+        let rows = self.row_range();
+        let cols = self.col_range();
+        match edge {
+            Direction::Up => Box::new(cols.map(move |c| Position::new(rows.start, c))),
+            Direction::Down => Box::new(cols.map(move |c| Position::new(rows.end - 1, c))),
+            Direction::Left => Box::new(rows.map(move |r| Position::new(r, cols.start))),
+            Direction::Right => Box::new(rows.map(move |r| Position::new(r, cols.end - 1))),
+        }
     }
 
     pub fn tiles_mut(&mut self) -> impl Iterator<Item = &mut T> {
@@ -117,7 +132,10 @@ impl<T> Grid<T> {
             .unwrap()
     }
 
-    pub fn get_mut_or_default(&mut self, position: &Position) -> &mut T where T : Default {
+    pub fn get_mut_or_default(&mut self, position: &Position) -> &mut T
+    where
+        T: Default,
+    {
         while position.row() < self.row_range().start {
             self.expand(Direction::Up);
         }
@@ -136,6 +154,9 @@ impl<T> Grid<T> {
 
 impl<T> From<Vec<Vec<T>>> for Grid<T> {
     fn from(value: Vec<Vec<T>>) -> Self {
-        Self { tiles: value, origin: Position::new(0,0) }
+        Self {
+            tiles: value,
+            origin: Position::new(0, 0),
+        }
     }
 }
