@@ -1,9 +1,11 @@
-use std::{collections::{HashMap, HashSet}, rc::{Weak, Rc}, cell::{Cell, RefCell}};
+use std::{
+    cell::{Cell, RefCell},
+    collections::{HashMap, HashSet},
+    rc::{Rc, Weak},
+};
 
 use scan_fmt::scan_fmt;
 use serde_derive::Deserialize;
-
-
 
 struct Directory {
     name: String,
@@ -39,7 +41,7 @@ impl Directory {
     pub fn full_name(self: &Rc<Directory>) -> String {
         let mut segments = Vec::new();
         let mut parent = self.parent();
-        
+
         segments.push(self.short_name());
         while let Some(n) = parent {
             segments.push(n.short_name());
@@ -62,44 +64,47 @@ impl Directory {
         size
     }
 
-    pub fn add_file(self: &Rc<Directory>, name: String, size: usize) -> Rc<File>{
-
+    pub fn add_file(self: &Rc<Directory>, name: String, size: usize) -> Rc<File> {
         if let Some(Node::File(f)) = self.children.borrow().get(&name) {
             return f.clone();
         }
 
-        let file = Rc::new(File { name: name.clone(), size, parent: Rc::downgrade(self)});
-        
-        self.children.borrow_mut().insert(name, Node::File(file.clone()));
-        
+        let file = Rc::new(File {
+            name: name.clone(),
+            size,
+            parent: Rc::downgrade(self),
+        });
+
+        self.children
+            .borrow_mut()
+            .insert(name, Node::File(file.clone()));
+
         file
     }
 
-    pub fn add_directory(self: &Rc<Directory>, name: String) -> Rc<Directory>{
-
+    pub fn add_directory(self: &Rc<Directory>, name: String) -> Rc<Directory> {
         if let Some(Node::Directory(f)) = self.children.borrow().get(&name) {
             return f.clone();
         }
 
         let file = Directory::new(name.clone(), Some(self));
-        
-        self.children.borrow_mut().insert(name, Node::Directory(file.clone()));
-        
+
+        self.children
+            .borrow_mut()
+            .insert(name, Node::Directory(file.clone()));
+
         file
     }
 
-    pub fn parent(self: &Rc<Directory>) -> Option<Rc<Directory>>
-    {
+    pub fn parent(self: &Rc<Directory>) -> Option<Rc<Directory>> {
         self.parent.as_ref().map(|p| p.upgrade().unwrap())
     }
 
-    pub fn dir(self: &Rc<Directory>) -> Vec<Node>
-    {
+    pub fn dir(self: &Rc<Directory>) -> Vec<Node> {
         self.children.borrow().values().cloned().collect()
     }
 
-    pub fn flatten(self: &Rc<Directory>) -> Vec<Node>
-    {
+    pub fn flatten(self: &Rc<Directory>) -> Vec<Node> {
         let mut v = Vec::new();
         v.push(Node::Directory(self.clone()));
 
@@ -112,7 +117,6 @@ impl Directory {
         }
         v
     }
-    
 }
 
 // scan_fmt!(line, "move {d} from {d} to {d}", usize, usize, usize)
@@ -130,7 +134,6 @@ fn get_tree(input: &str) -> Rc<Directory> {
         } else if let Ok(path) = scan_fmt!(line, "$ cd {s}", String) {
             current = current.add_directory(path);
         } else if line == "$ ls" {
-
         } else if let Ok((size, name)) = scan_fmt!(line, "{d} {s}", usize, String) {
             current.add_file(name, size);
         } else if let Ok(dir) = scan_fmt!(line, "dir {s}", String) {
@@ -143,15 +146,14 @@ fn get_tree(input: &str) -> Rc<Directory> {
     root
 }
 fn part1(input: &str) -> String {
-    
     let root = get_tree(input);
 
     let mut sum = 0;
     for n in root.flatten() {
         if let Node::Directory(d) = n {
             if d.total_size() <= 100000 {
-            println!("{} = {}", d.full_name(), d.total_size());
-            sum += d.total_size();    
+                println!("{} = {}", d.full_name(), d.total_size());
+                sum += d.total_size();
             }
         }
     }
@@ -160,7 +162,6 @@ fn part1(input: &str) -> String {
 }
 
 fn part2(input: &str) -> String {
-    
     let root = get_tree(input);
     let total_disk = 70000000;
     let min_unused = 30000000;
@@ -172,8 +173,7 @@ fn part2(input: &str) -> String {
     for n in root.flatten() {
         if let Node::Directory(d) = n {
             if d.total_size() >= must_free {
-                
-            println!("{} = {}", d.full_name(), d.total_size());
+                println!("{} = {}", d.full_name(), d.total_size());
                 if let Some(smallest) = smallest_dir {
                     if d.total_size() < smallest {
                         smallest_dir = Some(d.total_size());

@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+pub mod grid;
+pub mod position;
 
 pub fn load_input(base: &str, path: &str) -> String {
     let path = std::path::Path::new(base).join(path);
