@@ -5,7 +5,9 @@ use aoc::GetOrDefault;
 use scan_fmt::scan_fmt;
 use serde_derive::Deserialize;
 
+
 fn part1(input: &str) -> String {
+    
     let mut bitcount: Vec<usize> = Vec::new();
     let mut count = 0;
 
@@ -17,7 +19,7 @@ fn part1(input: &str) -> String {
                 *c += 1;
             }
         }
-        count += 1;
+        count +=1;
     }
 
     let mut gamma = "".to_string();
@@ -39,6 +41,7 @@ fn part1(input: &str) -> String {
 }
 
 fn part2(input: &str) -> String {
+    
     let mut bitcount: Vec<usize> = Vec::new();
     let mut count = 0;
 
@@ -53,7 +56,8 @@ fn part2(input: &str) -> String {
             }
         }
         values.push(line.to_string());
-        count += 1;
+        count +=1;
+        
     }
 
     let mut o2values = values.clone();
@@ -87,6 +91,7 @@ fn part2(input: &str) -> String {
         index += 1;
     }
 
+    
     println!("o2value: {}", o2values[0]);
     index = 0;
     while co2values.len() > 1 {
@@ -104,7 +109,10 @@ fn part2(input: &str) -> String {
             count = count + 1;
         }
 
+        
         let bit = bitcount.iter().nth(index).unwrap();
+
+        let least_common 
 
         if *bit <= count / 2 {
             co2values.drain_filter(|e| e.chars().nth(index).unwrap() == '0');

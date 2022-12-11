@@ -1,6 +1,14 @@
-use std::collections::HashMap;
+#![feature(step_trait)]
+
+use std::{collections::HashMap, hash::Hash};
+
+use coordinate::Coordinate;
+use tilemap::TileMap;
+pub mod coordinate;
 pub mod grid;
 pub mod position;
+pub mod range;
+pub mod tilemap;
 
 pub fn load_input(base: &str, path: &str) -> String {
     let path = std::path::Path::new(base).join(path);
@@ -33,22 +41,22 @@ where
         self.get_mut(index).unwrap()
     }
 }
-impl<K, T> GetOrDefault<K, T> for HashMap<K, T>
+impl<K, T> GetOrDefault<&K, T> for HashMap<K, T>
 where
     T: Default,
     K: Eq + std::hash::Hash + Clone,
 {
-    fn get_or_default(&mut self, index: K) -> &T {
-        if !self.contains_key(&index) {
+    fn get_or_default(&mut self, index: &K) -> &T {
+        if !self.contains_key(index) {
             self.insert(index.clone(), T::default());
         }
-        self.get(&index).unwrap()
+        self.get(index).unwrap()
     }
 
-    fn get_mut_or_default(&mut self, index: K) -> &mut T {
-        if !self.contains_key(&index) {
+    fn get_mut_or_default(&mut self, index: &K) -> &mut T {
+        if !self.contains_key(index) {
             self.insert(index.clone(), T::default());
         }
-        self.get_mut(&index).unwrap()
+        self.get_mut(index).unwrap()
     }
 }

@@ -5,6 +5,7 @@ use std::{
 };
 
 use aoc::{
+    coordinate::{Coordinate, RowCol},
     grid::Grid,
     position::{Direction, Position, EACH_DIRECTION},
 };
@@ -23,7 +24,7 @@ struct Tree {
     visible: Visibility,
 }
 
-type Field = Grid<Tree>;
+type Field = Grid<Tree, RowCol>;
 
 trait FieldTrait {
     fn total_visible(&self) -> usize;
@@ -41,38 +42,40 @@ impl FieldTrait for Field {
 }
 
 fn parse_input(input: &str) -> Field {
-    let mut rows = Vec::new();
-    for line in input.lines() {
-        let mut row = Vec::new();
-        for char in line.chars() {
+    let mut field = Grid::new();
+
+    for (row_index, line) in input.lines().enumerate() {
+        for (col_index, char) in line.chars().enumerate() {
             let height = char as u32 - '0' as u32;
-            row.push(Tree {
-                height,
-                visible: Visibility::Unknown,
-            });
+            field.insert(
+                RowCol::new(row_index as i32, col_index as i32),
+                Tree {
+                    height,
+                    visible: Visibility::Unknown,
+                },
+            );
         }
-        rows.push(row);
     }
-    rows.into()
+    field
 }
 
 fn part1(input: &str) -> String {
     let mut field = parse_input(input);
 
     for direction in EACH_DIRECTION {
-        for mut position in field.edge_positions(direction.opposite()) {
+        for mut position in field.range().edge_positions(direction.opposite()) {
             //println!("Position: {:?} direction {:?}", position, direction);
-            let mut highest = field.get(&position).height;
-            field.get_mut(&position).visible = Visibility::Visible;
+            let mut highest = field.get(&position).unwrap().height;
+            field.get_mut(&position).unwrap().visible = Visibility::Visible;
 
-            position = position.move_absolute(direction, 1);
-            while field.valid_position(&position) {
-                let tree = field.get_mut(&position);
+            position = position.project(direction, 1);
+            while field.range().contains(&position) {
+                let tree = field.get_mut(&position).unwrap();
                 if tree.height > highest {
                     tree.visible = Visibility::Visible;
                     highest = tree.height;
                 }
-                position = position.move_absolute(direction, 1);
+                position = position.project(direction, 1);
             }
         }
     }
@@ -83,23 +86,23 @@ fn part2(input: &str) -> String {
     let field = parse_input(input);
 
     let mut high_score = 0;
-    for position in field.positions() {
+    for position in field.range().iter() {
         let mut visible_distances = HashMap::new();
         for direction in EACH_DIRECTION {
             let mut visible_trees = 0;
-            let current_tree_height = field.get(&position).height;
+            let current_tree_height = field.get(&position).unwrap().height;
 
             let mut position = position.clone();
-            position = position.move_absolute(direction, 1);
-            while field.valid_position(&position) {
-                let observed_tree = field.get(&position);
+            position = position.project(direction, 1);
+            while field.range().contains(&position) {
+                let observed_tree = field.get(&position).unwrap();
 
                 visible_trees += 1;
 
                 if observed_tree.height >= current_tree_height {
                     break;
                 }
-                position = position.move_absolute(direction, 1);
+                position = position.project(direction, 1);
             }
             visible_distances.insert(direction, visible_trees);
         }
