@@ -1,7 +1,8 @@
 use std::{
     cell::{Cell, RefCell},
     collections::{HashMap, HashSet},
-    rc::{Rc, Weak}, fmt::Display,
+    fmt::Display,
+    rc::{Rc, Weak},
 };
 
 use aoc::{
@@ -12,15 +13,13 @@ use aoc::{
 use scan_fmt::scan_fmt;
 use serde_derive::Deserialize;
 
-
 enum OpCode {
     AddX(i32),
     Noop,
 }
 
 impl OpCode {
-    pub fn from_str(s: &str) -> Option<OpCode>
-    {
+    pub fn from_str(s: &str) -> Option<OpCode> {
         if let Ok(i) = scan_fmt!(s, "addx {d}", i32) {
             Some(OpCode::AddX(i))
         } else if s == "noop" {
@@ -64,17 +63,15 @@ fn part1(input: &str) -> String {
     let mut signal = Vec::new();
 
     for i in input {
-
         for _ in 0..i.cycles() {
-            
-            let strength  = X * cycle_count;  
+            let strength = X * cycle_count;
             signal.push(strength);
             cycle_count += 1;
         }
 
         match i {
             OpCode::AddX(i) => X += i,
-            OpCode::Noop => {},
+            OpCode::Noop => {}
         }
     }
     let sample_points = [20, 60, 100, 140, 180, 220];
@@ -93,7 +90,10 @@ struct Sprite {
 
 impl Sprite {
     pub fn new(characters: String, start_offset: i32) -> Self {
-        Self { characters, start_offset }
+        Self {
+            characters,
+            start_offset,
+        }
     }
 
     pub fn get_character(&self, offset: i32) -> Option<char> {
@@ -115,12 +115,9 @@ fn part2(input: &str) -> String {
 
     let mut output = Grid::new();
     for i in input {
-
         for _ in 0..i.cycles() {
-            
             let row = (cycle_count - 1) / 40;
             let col = (cycle_count - 1) % 40;
-
 
             let ch = sprite.get_character(X - col).unwrap_or('.');
             //println!("{} {},{} = {}", cycle_count, row, col, ch);
@@ -132,11 +129,11 @@ fn part2(input: &str) -> String {
 
         match i {
             OpCode::AddX(i) => X += i,
-            OpCode::Noop => {},
+            OpCode::Noop => {}
         }
     }
 
-    output.print(|_c, t| t.unwrap().to_string() );
+    output.print(|_c, t| t.unwrap().to_string());
     "".to_string()
 }
 
@@ -169,7 +166,6 @@ fn main() {
     }
     println!("");
 
-
     let input = aoc::load_input(env!("CARGO_MANIFEST_DIR"), "input.txt");
 
     println!("Puzzle Part 1:");
@@ -191,5 +187,4 @@ fn main() {
     } else {
         println!("EXAMPLE PART 2 FAILED");
     }
-    
 }

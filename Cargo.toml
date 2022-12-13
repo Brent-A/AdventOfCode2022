@@ -14,10 +14,11 @@ members = [
     "challenges/2022/day8",
     "challenges/2022/day9",
     "challenges/2022/day10",
+    "challenges/2022/day11",
     "tools/aoc-prep",
 ]
 default-members = [
-    "challenges/2022/day10"
+    "challenges/2022/day11"
 ]
 
 [workspace.dependencies]

@@ -48,22 +48,24 @@ fn part1(input: &str) -> String {
         for _ in 0..instruction.count {
             head = head.project(instruction.direction, 1);
 
-            let ((hdistance, hdirection), (vdistance, vdirection)) = (tail.horizontal_relative_to(&head), tail.vertical_relative_to(&head));
+            let ((hdistance, hdirection), (vdistance, vdirection)) = (
+                tail.horizontal_relative_to(&head),
+                tail.vertical_relative_to(&head),
+            );
 
             if hdistance > 1 || vdistance > 1 {
                 tail = tail.project(hdirection.opposite(), 1);
                 tail = tail.project(vdirection.opposite(), 1);
             }
 
-            
             grid.get_mut_or_default(&head);
 
             *grid.get_mut_or_default(&tail) = true;
 
-            /* 
+            /*
             println!("{:?} {}", instruction.direction, instruction.count);
             grid.print(|c, t| {
-                
+
                 if c == tail && c == head {
                     "X".to_string()
                 } else
@@ -98,26 +100,28 @@ fn part2(input: &str) -> String {
             rope[0] = rope[0].project(instruction.direction, 1);
 
             for knot in 1..10 {
-                let head = rope[knot-1].clone();
+                let head = rope[knot - 1].clone();
                 let tail = &mut rope[knot];
-                let ((hdistance, hdirection), (vdistance, vdirection)) = (tail.horizontal_relative_to(&head), tail.vertical_relative_to(&head));
+                let ((hdistance, hdirection), (vdistance, vdirection)) = (
+                    tail.horizontal_relative_to(&head),
+                    tail.vertical_relative_to(&head),
+                );
 
                 if hdistance > 1 || vdistance > 1 {
                     *tail = tail.project(hdirection.opposite(), 1);
                     *tail = tail.project(vdirection.opposite(), 1);
                 }
 
-                
                 grid.get_mut_or_default(&head);
                 grid.get_mut_or_default(tail);
             }
 
             *grid.get_mut_or_default(&rope[9]) = true;
 
-            /* 
+            /*
             println!("{:?} {}", instruction.direction, instruction.count);
             grid.print(|c, t| {
-                
+
                 if c == tail && c == head {
                     "X".to_string()
                 } else
@@ -168,7 +172,6 @@ fn main() {
     }
     println!("");
 
-
     let input = aoc::load_input(env!("CARGO_MANIFEST_DIR"), "input.txt");
 
     println!("Puzzle Part 1:");
@@ -190,5 +193,4 @@ fn main() {
     } else {
         println!("EXAMPLE PART 2 FAILED");
     }
-    
 }
