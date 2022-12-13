@@ -38,11 +38,11 @@ impl<T: Clone + PartialOrd> Range<T> {
         *self = self.extended(point);
     }
 
-    pub fn iter(&self) -> Box<dyn Iterator<Item = T>>
+    pub fn iter(&self) -> Box<dyn DoubleEndedIterator<Item = T>>
     where
         T: Step + 'static,
     {
-        let iterator: Box<dyn Iterator<Item = T>> = if let Some(range) = &self.range {
+        let iterator: Box<dyn DoubleEndedIterator<Item = T>> = if let Some(range) = &self.range {
             Box::new(range.clone())
         } else {
             Box::new(std::iter::empty())

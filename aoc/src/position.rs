@@ -18,6 +18,7 @@ pub enum Direction {
     Down,
     Left,
     Right,
+    None,
 }
 
 impl Direction {
@@ -27,6 +28,7 @@ impl Direction {
             Direction::Down => Direction::Up,
             Direction::Left => Direction::Right,
             Direction::Right => Direction::Left,
+            Direction::None => Direction::None,
         }
     }
     pub fn as_char(&self) -> char {
@@ -35,6 +37,7 @@ impl Direction {
             Direction::Down => 'v',
             Direction::Left => '<',
             Direction::Right => '>',
+            Direction::None => '*',
         }
     }
     pub fn rotate(&self, rotation: Rotation) -> Direction {
@@ -55,6 +58,7 @@ impl Direction {
                 Rotation::Left => Direction::Down,
                 Rotation::Right => Direction::Up,
             },
+            Direction::None => Direction::None,
         }
     }
 }
@@ -130,6 +134,7 @@ impl Position {
                 col: self.col + distance,
                 orientation: self.orientation,
             },
+            Direction::None => self.clone(),
         }
     }
     pub fn move_relative(&self, movement: Movement, distance: i32) -> Position {
@@ -140,24 +145,28 @@ impl Position {
                     Direction::Down => self.move_absolute(Direction::Down, distance),
                     Direction::Left => self.move_absolute(Direction::Left, distance),
                     Direction::Right => self.move_absolute(Direction::Right, distance),
+                    Direction::None => self.clone(),
                 },
                 Movement::Left => match orientation {
                     Direction::Up => self.move_absolute(Direction::Left, distance),
                     Direction::Down => self.move_absolute(Direction::Right, distance),
                     Direction::Left => self.move_absolute(Direction::Down, distance),
                     Direction::Right => self.move_absolute(Direction::Up, distance),
+                    Direction::None => self.clone(),
                 },
                 Movement::Right => match orientation {
                     Direction::Up => self.move_absolute(Direction::Right, distance),
                     Direction::Down => self.move_absolute(Direction::Left, distance),
                     Direction::Left => self.move_absolute(Direction::Up, distance),
                     Direction::Right => self.move_absolute(Direction::Down, distance),
+                    Direction::None => self.clone(),
                 },
                 Movement::Back => match orientation {
                     Direction::Up => self.move_absolute(Direction::Down, distance),
                     Direction::Down => self.move_absolute(Direction::Up, distance),
                     Direction::Left => self.move_absolute(Direction::Right, distance),
                     Direction::Right => self.move_absolute(Direction::Left, distance),
+                    Direction::None => self.clone(),
                 },
             }
         } else {

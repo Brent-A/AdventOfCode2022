@@ -50,6 +50,17 @@ where
         self.tiles.values_mut()
     }
 
+    pub fn print<F: Fn(C, Option<&T>) -> String>(&self, tile_printer: F) {
+        for v in self.range.vertical().iter_top_top_bottom() {
+            for h in self.range.horizontal().iter_left_to_right() {
+                let c = C::from_horz_vert(h, v);
+                let t = self.get(&c);
+                print!("{}", tile_printer(c, t));
+            }
+            println!("");
+        }
+    }
+
     pub fn enumerate_tiles(&self) -> impl Iterator<Item = (C, Option<&T>)> {
         self.range.iter().map(|c| {
             let t = self.get(&c);

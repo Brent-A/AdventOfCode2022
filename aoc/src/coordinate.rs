@@ -19,9 +19,13 @@ pub enum VerticalAxisOrientation {
 
 pub trait Coordinate
 where
-    Self: Sized + Default,
+    Self: Sized + Default + Clone,
 {
-    type Unit: Copy + PartialOrd + 'static;
+    type Unit: Copy
+        + PartialOrd
+        + Add<Self::Unit, Output = Self::Unit>
+        + Sub<Self::Unit, Output = Self::Unit>
+        + 'static;
 
     const VERTICAL_AXIS_ORIENTATION: VerticalAxisOrientation;
     const HORIZONTAL_AXIS_ORIENTATION: HorizontalAxisOrientation;
@@ -30,8 +34,6 @@ where
     fn vertical(&self) -> &Self::Unit;
 
     fn from_horz_vert(horizontal: Self::Unit, vertical: Self::Unit) -> Self;
-
-    fn project(&self, direction: Direction, distance: Self::Unit) -> Self;
 
     fn left(&self, distance: Self::Unit) -> Self {
         self.project(Direction::Left, distance)
@@ -44,6 +46,87 @@ where
     }
     fn down(&self, distance: Self::Unit) -> Self {
         self.project(Direction::Down, distance)
+    }
+
+    fn horizontal_relative_to(&self, other: &Self) -> (Self::Unit, Direction) {
+        match Self::HORIZONTAL_AXIS_ORIENTATION {
+            HorizontalAxisOrientation::PositiveRight => {
+                if *other.horizontal() == *self.horizontal() {
+                    (*other.horizontal() - *self.horizontal(), Direction::None)
+                } else if *other.horizontal() > *self.horizontal() {
+                    (*other.horizontal() - *self.horizontal(), Direction::Left)
+                } else {
+                    (*self.horizontal() - *other.horizontal(), Direction::Right)
+                }
+            }
+            HorizontalAxisOrientation::PositiveLeft => {
+                if *other.horizontal() == *self.horizontal() {
+                    (*other.horizontal() - *self.horizontal(), Direction::None)
+                } else if *other.horizontal() > *self.horizontal() {
+                    (*other.horizontal() - *self.horizontal(), Direction::Right)
+                } else {
+                    (*self.horizontal() - *other.horizontal(), Direction::Left)
+                }
+            }
+        }
+    }
+
+    fn vertical_relative_to(&self, other: &Self) -> (Self::Unit, Direction) {
+        match Self::VERTICAL_AXIS_ORIENTATION {
+            VerticalAxisOrientation::PositiveDown => {
+                if *other.vertical() == *self.vertical() {
+                    (*other.vertical() - *self.vertical(), Direction::None)
+                } else if *other.vertical() > *self.vertical() {
+                    (*other.vertical() - *self.vertical(), Direction::Up)
+                } else {
+                    (*self.vertical() - *other.vertical(), Direction::Down)
+                }
+            }
+            VerticalAxisOrientation::PositiveUp => {
+                if *other.vertical() == *self.vertical() {
+                    (*other.vertical() - *self.vertical(), Direction::None)
+                } else if *other.vertical() > *self.vertical() {
+                    (*other.vertical() - *self.vertical(), Direction::Down)
+                } else {
+                    (*self.vertical() - *other.vertical(), Direction::Up)
+                }
+            }
+        }
+    }
+
+    fn project(&self, direction: Direction, distance: Self::Unit) -> Self {
+        match direction {
+            Direction::Up => Self::from_horz_vert(
+                *self.horizontal(),
+                match Self::VERTICAL_AXIS_ORIENTATION {
+                    VerticalAxisOrientation::PositiveUp => *self.vertical() + distance,
+                    VerticalAxisOrientation::PositiveDown => *self.vertical() - distance,
+                },
+            ),
+            Direction::Down => Self::from_horz_vert(
+                *self.horizontal(),
+                match Self::VERTICAL_AXIS_ORIENTATION {
+                    VerticalAxisOrientation::PositiveUp => *self.vertical() - distance,
+                    VerticalAxisOrientation::PositiveDown => *self.vertical() + distance,
+                },
+            ),
+
+            Direction::Left => Self::from_horz_vert(
+                match Self::HORIZONTAL_AXIS_ORIENTATION {
+                    HorizontalAxisOrientation::PositiveRight => *self.horizontal() - distance,
+                    HorizontalAxisOrientation::PositiveLeft => *self.horizontal() + distance,
+                },
+                *self.vertical(),
+            ),
+            Direction::Right => Self::from_horz_vert(
+                match Self::HORIZONTAL_AXIS_ORIENTATION {
+                    HorizontalAxisOrientation::PositiveRight => *self.horizontal() + distance,
+                    HorizontalAxisOrientation::PositiveLeft => *self.horizontal() - distance,
+                },
+                *self.vertical(),
+            ),
+            Direction::None => self.clone(),
+        }
     }
 }
 
@@ -130,6 +213,7 @@ impl<C: Coordinate> RectangularRange<C> {
             Direction::Down => self.extend(&self.bottom_left().unwrap().down(distance)),
             Direction::Left => self.extend(&self.top_left().unwrap().left(distance)),
             Direction::Right => self.extend(&self.top_right().unwrap().right(distance)),
+            Direction::None => (),
         }
     }
 
@@ -200,6 +284,7 @@ impl<C: Coordinate> RectangularRange<C> {
     pub fn edge_positions(&self, edge: Direction) -> Box<dyn Iterator<Item = C>>
     where
         C::Unit: Step,
+        C: 'static,
     {
         match edge {
             Direction::Up => {
@@ -234,6 +319,7 @@ impl<C: Coordinate> RectangularRange<C> {
                         .map(move |v| Coordinate::from_horz_vert(h, v)),
                 )
             }
+            Direction::None => Box::new(std::iter::empty()),
         }
     }
 }
@@ -289,6 +375,15 @@ where
             HorizontalAxisOrientation::PositiveLeft => self.range.start(),
         }
     }
+    pub fn iter_left_to_right(&self) -> Box<dyn DoubleEndedIterator<Item = C::Unit>>
+    where
+        C::Unit: Step,
+    {
+        match C::HORIZONTAL_AXIS_ORIENTATION {
+            HorizontalAxisOrientation::PositiveRight => Box::new(self.range.iter()),
+            HorizontalAxisOrientation::PositiveLeft => Box::new(self.range.iter().rev()),
+        }
+    }
 }
 
 pub struct VerticalRange<C>
@@ -342,6 +437,15 @@ where
             VerticalAxisOrientation::PositiveDown => self.range.end(),
         }
     }
+    pub fn iter_top_top_bottom(&self) -> Box<dyn DoubleEndedIterator<Item = C::Unit>>
+    where
+        C::Unit: Step,
+    {
+        match C::VERTICAL_AXIS_ORIENTATION {
+            VerticalAxisOrientation::PositiveDown => Box::new(self.range.iter()),
+            VerticalAxisOrientation::PositiveUp => Box::new(self.range.iter().rev()),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy, Hash, PartialEq, Eq)]
@@ -372,27 +476,6 @@ impl<U: Add<U, Output = U> + Sub<U, Output = U> + Default + Copy + PartialOrd + 
     for XY<U>
 {
     type Unit = U;
-
-    fn project(&self, direction: Direction, distance: Self::Unit) -> Self {
-        match direction {
-            Direction::Up => Self {
-                x: self.x,
-                y: self.y + distance,
-            },
-            Direction::Down => Self {
-                x: self.x,
-                y: self.y - distance,
-            },
-            Direction::Left => Self {
-                x: self.x - distance,
-                y: self.y,
-            },
-            Direction::Right => Self {
-                x: self.x + distance,
-                y: self.y + distance,
-            },
-        }
-    }
 
     fn from_horz_vert(horizontal: Self::Unit, vertical: Self::Unit) -> Self {
         Self {
@@ -425,6 +508,19 @@ impl<U> RowCol<U> {
     pub fn new(row: U, col: U) -> Self {
         Self { row, col }
     }
+
+    pub fn row(&self) -> &U {
+        &self.row
+    }
+    pub fn col(&self) -> &U {
+        &self.col
+    }
+    pub fn row_mut(&mut self) -> &mut U {
+        &mut self.row
+    }
+    pub fn col_mut(&mut self) -> &mut U {
+        &mut self.col
+    }
 }
 
 impl<U: Display> Display for RowCol<U> {
@@ -440,43 +536,6 @@ impl<
     > Coordinate for RowCol<U, PR, PU>
 {
     type Unit = U;
-
-    fn project(&self, direction: Direction, distance: Self::Unit) -> Self {
-        match direction {
-            Direction::Up => Self {
-                row: if PU {
-                    self.row + distance
-                } else {
-                    self.row - distance
-                },
-                col: self.col,
-            },
-            Direction::Down => Self {
-                row: if PU {
-                    self.row - distance
-                } else {
-                    self.row + distance
-                },
-                col: self.col,
-            },
-            Direction::Left => Self {
-                row: self.row,
-                col: if PR {
-                    self.col - distance
-                } else {
-                    self.col + distance
-                },
-            },
-            Direction::Right => Self {
-                row: self.row,
-                col: if PR {
-                    self.col + distance
-                } else {
-                    self.col - distance
-                },
-            },
-        }
-    }
 
     fn from_horz_vert(horizontal: Self::Unit, vertical: Self::Unit) -> Self {
         Self {
