@@ -449,12 +449,12 @@ where
 }
 
 #[derive(Debug, Default, Clone, Copy, Hash, PartialEq, Eq)]
-pub struct XY<U = i32> {
+pub struct XY<U = i32, const POSITIVE_RIGHT: bool = true, const POSITIVE_UP: bool = true> {
     x: U,
     y: U,
 }
 
-impl<U> XY<U> {
+impl<U, const PR: bool, const PU: bool> XY<U, PR, PU> {
     pub fn new(x: U, y: U) -> Self {
         Self { x, y }
     }
@@ -466,14 +466,17 @@ impl<U> XY<U> {
     }
 }
 
-impl<U: Display> Display for XY<U> {
+impl<U: Display, const PR: bool, const PU: bool> Display for XY<U, PR, PU> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("<x={},y={}>", self.x, self.y))
     }
 }
 
-impl<U: Add<U, Output = U> + Sub<U, Output = U> + Default + Copy + PartialOrd + 'static> Coordinate
-    for XY<U>
+impl<
+        U: Add<U, Output = U> + Sub<U, Output = U> + Default + Copy + PartialOrd + 'static,
+        const PR: bool,
+        const PU: bool,
+    > Coordinate for XY<U, PR, PU>
 {
     type Unit = U;
 
@@ -484,10 +487,17 @@ impl<U: Add<U, Output = U> + Sub<U, Output = U> + Default + Copy + PartialOrd + 
         }
     }
 
-    const VERTICAL_AXIS_ORIENTATION: VerticalAxisOrientation = VerticalAxisOrientation::PositiveUp;
+    const VERTICAL_AXIS_ORIENTATION: VerticalAxisOrientation = if PU {
+        VerticalAxisOrientation::PositiveUp
+    } else {
+        VerticalAxisOrientation::PositiveDown
+    };
 
-    const HORIZONTAL_AXIS_ORIENTATION: HorizontalAxisOrientation =
-        HorizontalAxisOrientation::PositiveRight;
+    const HORIZONTAL_AXIS_ORIENTATION: HorizontalAxisOrientation = if PR {
+        HorizontalAxisOrientation::PositiveRight
+    } else {
+        HorizontalAxisOrientation::PositiveLeft
+    };
 
     fn horizontal(&self) -> &Self::Unit {
         &self.x

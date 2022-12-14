@@ -5,7 +5,7 @@ use std::{
     collections::{HashMap, HashSet, VecDeque},
     fmt::Display,
     hash::Hash,
-    ops::{Sub, Index},
+    ops::{Index, Sub},
     rc::{Rc, Weak},
     slice::SliceIndex,
 };
@@ -112,7 +112,7 @@ impl PartialOrd for Element {
 
                 l.len().cmp(&r.len())
             }
-            (Element::List(l), Element::Value(r)) =>  self.cmp(&Element::List(vec![other.clone()])),
+            (Element::List(l), Element::Value(r)) => self.cmp(&Element::List(vec![other.clone()])),
             (Element::Value(l), Element::List(r)) => Element::List(vec![self.clone()]).cmp(other),
             (Element::Value(l), Element::Value(r)) => l.cmp(r),
         })
@@ -159,7 +159,6 @@ fn part1(input: &str) -> String {
         if pair.left <= pair.right {
             correct_indicies.push(index + 1);
         }
-        
     }
     println!("indicies: {correct_indicies:?}");
     correct_indicies.iter().sum::<usize>().to_string()
@@ -168,17 +167,28 @@ fn part1(input: &str) -> String {
 fn part2(input: &str) -> String {
     let input = parse_input(input);
 
-    let mut packets : Vec<_> = input.iter().flat_map(|p| [p.left.clone(), p.right.clone()]).collect();
+    let mut packets: Vec<_> = input
+        .iter()
+        .flat_map(|p| [p.left.clone(), p.right.clone()])
+        .collect();
 
-    let divider0 = Element::parse("[[2]]"); 
-    let divider1 = Element::parse("[[6]]"); 
+    let divider0 = Element::parse("[[2]]");
+    let divider1 = Element::parse("[[6]]");
     packets.push(divider0.clone());
     packets.push(divider1.clone());
 
     packets.sort();
 
-    let divider0_position = packets.iter().enumerate().find_map(|(i, e)| if *e == divider0 { Some(i) } else { None }).unwrap();
-    let divider1_position = packets.iter().enumerate().find_map(|(i, e)| if *e == divider1 { Some(i) } else { None }).unwrap();
+    let divider0_position = packets
+        .iter()
+        .enumerate()
+        .find_map(|(i, e)| if *e == divider0 { Some(i) } else { None })
+        .unwrap();
+    let divider1_position = packets
+        .iter()
+        .enumerate()
+        .find_map(|(i, e)| if *e == divider1 { Some(i) } else { None })
+        .unwrap();
 
     ((divider0_position + 1) * (divider1_position + 1)).to_string()
 }
