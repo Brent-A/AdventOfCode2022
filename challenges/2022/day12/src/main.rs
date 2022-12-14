@@ -1,9 +1,12 @@
 use std::{
+    borrow::Borrow,
     cell::{Cell, RefCell},
     collections::{HashMap, HashSet, VecDeque},
     fmt::Display,
     hash::Hash,
-    rc::{Rc, Weak}, borrow::Borrow, ops::Sub, slice::SliceIndex,
+    ops::Sub,
+    rc::{Rc, Weak},
+    slice::SliceIndex,
 };
 
 use aoc::{
@@ -37,7 +40,6 @@ impl Display for Height {
     }
 }
 
-
 fn parse_input(input: &str) -> (RowCol, RowCol, Grid<Height, RowCol>) {
     let mut heights = Grid::new();
 
@@ -56,7 +58,13 @@ fn parse_input(input: &str) -> (RowCol, RowCol, Grid<Height, RowCol>) {
                 end = Some(coordinate.clone());
             }
 
-            let h = if c == 'S' { Height::new('a') } else if c == 'E' { Height::new('z') } else { Height::new(c) };
+            let h = if c == 'S' {
+                Height::new('a')
+            } else if c == 'E' {
+                Height::new('z')
+            } else {
+                Height::new(c)
+            };
             *heights.get_mut_or_default(&coordinate) = h;
 
             col += 1;
@@ -67,9 +75,12 @@ fn parse_input(input: &str) -> (RowCol, RowCol, Grid<Height, RowCol>) {
     (start.unwrap(), end.unwrap(), heights)
 }
 
-
-fn fill_distances(heights: &Grid<Height, RowCol>, distances: &mut Grid<usize, RowCol>, position: RowCol, distance: usize)
-{
+fn fill_distances(
+    heights: &Grid<Height, RowCol>,
+    distances: &mut Grid<usize, RowCol>,
+    position: RowCol,
+    distance: usize,
+) {
     if let Some(existing_distance) = distances.get(&position) {
         if *existing_distance <= distance {
             return;

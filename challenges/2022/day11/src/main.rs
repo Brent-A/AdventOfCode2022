@@ -1,9 +1,10 @@
 use std::{
+    borrow::Borrow,
     cell::{Cell, RefCell},
     collections::{HashMap, HashSet, VecDeque},
     fmt::Display,
     hash::Hash,
-    rc::{Rc, Weak}, borrow::Borrow,
+    rc::{Rc, Weak},
 };
 
 use aoc::{
@@ -77,7 +78,7 @@ impl Test {
         match self {
             Test::DivisibleBy(v) => Some(*v),
         }
-    } 
+    }
 }
 
 #[derive(Debug)]
@@ -105,7 +106,6 @@ struct Monkey {
     inspection_count: usize,
 }
 
-
 fn parse_input(input: &str) -> Vec<RefCell<Monkey>> {
     let mut monkeys = Vec::new();
 
@@ -120,7 +120,7 @@ fn parse_input(input: &str) -> Vec<RefCell<Monkey>> {
             String
         )
         .unwrap();
-        
+
         let items = items_str
             .split(",")
             .map(|i| i.trim().parse::<Worries>().unwrap())
@@ -132,13 +132,26 @@ fn parse_input(input: &str) -> Vec<RefCell<Monkey>> {
         )
         .unwrap();
         let operation = Expression::parse(&operation_str);
-        let test_str = scan_fmt!(line_iterator.next().unwrap(), "Test: {[a-z0-9 ]}{e}", String).unwrap();
+        let test_str = scan_fmt!(
+            line_iterator.next().unwrap(),
+            "Test: {[a-z0-9 ]}{e}",
+            String
+        )
+        .unwrap();
         let test = Test::parse(&test_str);
-        let true_action_str =
-            scan_fmt!(line_iterator.next().unwrap(), "If true: {[a-zA-Z0-9 ]}{e}", String).unwrap();
+        let true_action_str = scan_fmt!(
+            line_iterator.next().unwrap(),
+            "If true: {[a-zA-Z0-9 ]}{e}",
+            String
+        )
+        .unwrap();
         let true_action = Action::parse(&true_action_str);
-        let false_action_str =
-            scan_fmt!(line_iterator.next().unwrap(), "If false: {[a-zA-Z0-9 ]}{e}", String).unwrap();
+        let false_action_str = scan_fmt!(
+            line_iterator.next().unwrap(),
+            "If false: {[a-zA-Z0-9 ]}{e}",
+            String
+        )
+        .unwrap();
         let false_action = Action::parse(&false_action_str);
 
         monkeys.push(RefCell::new(Monkey {
@@ -193,25 +206,28 @@ fn part1(input: &str) -> String {
                 }
             }
         }
-/* 
+        /*
         println!("Round {}", round + 1);
         for (i, monkey) in input.iter().enumerate() {
             println!("Monkey {}: {:?}", i, monkey.borrow().items);
         }
         */
     }
-    let mut top_count :Vec<_> = input.iter().map(|m| m.borrow().inspection_count).collect();
+    let mut top_count: Vec<_> = input.iter().map(|m| m.borrow().inspection_count).collect();
     top_count.sort();
     println!("top_count {top_count:?}");
-    let monkey_business : usize = top_count.iter().rev().take(2).product();
+    let monkey_business: usize = top_count.iter().rev().take(2).product();
     monkey_business.to_string()
 }
 
 fn part2(input: &str) -> String {
-    let  input = parse_input(input);
+    let input = parse_input(input);
     //println!("Monkeys: {input:?}");
 
-    let cap : Worries = input.iter().map(|m| m.borrow().test.divisible_amount().unwrap()).product();
+    let cap: Worries = input
+        .iter()
+        .map(|m| m.borrow().test.divisible_amount().unwrap())
+        .product();
 
     for round in 0..10000 {
         for (index, monkey) in input.iter().enumerate() {
@@ -253,10 +269,10 @@ fn part2(input: &str) -> String {
             println!("Monkey {}: {:?}", i, monkey.borrow().items);
         }*/
     }
-    let mut top_count :Vec<_> = input.iter().map(|m| m.borrow().inspection_count).collect();
+    let mut top_count: Vec<_> = input.iter().map(|m| m.borrow().inspection_count).collect();
     top_count.sort();
     println!("top_count {top_count:?}");
-    let monkey_business : usize = top_count.iter().rev().take(2).product();
+    let monkey_business: usize = top_count.iter().rev().take(2).product();
     monkey_business.to_string()
 }
 
