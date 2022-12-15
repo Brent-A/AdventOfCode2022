@@ -1,6 +1,6 @@
 #![feature(step_trait)]
 
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 pub mod coordinate;
 pub mod grid;

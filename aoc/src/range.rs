@@ -3,7 +3,7 @@ use std::{
     ops::{RangeInclusive, Sub},
 };
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Range<T> {
     range: Option<RangeInclusive<T>>,
 }
@@ -76,7 +76,207 @@ impl<T: Clone + PartialOrd> Range<T> {
         }
     }
 
+    pub fn union(&self, other: &Self) -> Vec<Self>
+    where
+        T: Step,
+    {
+        match (&self.range, &other.range) {
+            (None, None) => vec![],
+            (None, Some(o)) => vec![other.clone()],
+            (Some(s), None) => vec![self.clone()],
+            (Some(s), Some(o)) => {
+                let self_start = self.start().unwrap().clone();
+                let self_end = self.end().unwrap().clone();
+                let other_start = other.start().unwrap().clone();
+                let other_end = other.end().unwrap().clone();
+
+                if self_start < other_start {
+                    if self_end < other_start {
+                        if Step::forward(self_end, 1) == other_start {
+                            vec![Self {
+                                range: Some(self_start..=other_end),
+                            }]
+                        } else {
+                            vec![self.clone(), other.clone()]
+                        }
+                    } else if self_end < other_end {
+                        vec![Self {
+                            range: Some(self_start..=other_end),
+                        }]
+                    } else {
+                        vec![Self {
+                            range: Some(self_start..=self_end),
+                        }]
+                    }
+                } else if self_start < other_end {
+                    if self_end < other_end {
+                        vec![Self {
+                            range: Some(other_start..=other_end),
+                        }]
+                    } else {
+                        vec![Self {
+                            range: Some(other_start..=self_end),
+                        }]
+                    }
+                } else {
+                    vec![self.clone(), other.clone()]
+                }
+            }
+        }
+    }
+
+    pub fn intersect(&self, other: &Self) -> Self {
+        if self.is_empty() || other.is_empty() {
+            Self::empty()
+        } else {
+            let self_start = self.start().unwrap().clone();
+            let self_end = self.end().unwrap().clone();
+            let other_start = other.start().unwrap().clone();
+            let other_end = other.end().unwrap().clone();
+
+            if self_start < other_start {
+                if self_end < other_start {
+                    Self { range: None }
+                } else if self_end < other_end {
+                    Self {
+                        range: Some(other_start..=self_end),
+                    }
+                } else {
+                    Self {
+                        range: Some(other_start..=other_end),
+                    }
+                }
+            } else if self_start < other_end {
+                if self_end < other_end {
+                    Self {
+                        range: Some(self_start..=self_end),
+                    }
+                } else {
+                    Self {
+                        range: Some(self_start..=other_end),
+                    }
+                }
+            } else {
+                Self { range: None }
+            }
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.range.is_none()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Range;
+
+    #[test]
+    fn intersect() {
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(0..=2)),
+            Range::new(0..=2)
+        );
+
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(-1..=2)),
+            Range::new(0..=2)
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(0..=3)),
+            Range::new(0..=2)
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(1..=2)),
+            Range::new(1..=2)
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(0..=1)),
+            Range::new(0..=1)
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(-1..=3)),
+            Range::new(0..=2)
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(1..=1)),
+            Range::new(1..=1)
+        );
+
+        assert_eq!(
+            Range::new(-1..=2).intersect(&Range::new(0..=2)),
+            Range::new(0..=2)
+        );
+        assert_eq!(
+            Range::new(0..=3).intersect(&Range::new(0..=2)),
+            Range::new(0..=2)
+        );
+        assert_eq!(
+            Range::new(1..=2).intersect(&Range::new(0..=2)),
+            Range::new(1..=2)
+        );
+        assert_eq!(
+            Range::new(0..=1).intersect(&Range::new(0..=2)),
+            Range::new(0..=1)
+        );
+
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(2..=3)),
+            Range::new(2..=2)
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(3..=4)),
+            Range::empty()
+        );
+        assert_eq!(
+            Range::new(0..=2).intersect(&Range::new(-2..=-1)),
+            Range::empty()
+        );
+    }
+
+    #[test]
+    fn union() {
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(0..=2)),
+            [Range::new(0..=2)]
+        );
+
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(-1..=2)),
+            [Range::new(-1..=2)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(0..=3)),
+            [Range::new(0..=3)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(1..=2)),
+            [Range::new(0..=2)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(0..=1)),
+            [Range::new(0..=2)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(-1..=3)),
+            [Range::new(-1..=3)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(1..=1)),
+            [Range::new(0..=2)]
+        );
+
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(2..=3)),
+            [Range::new(0..=3)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(3..=4)),
+            [Range::new(0..=4)]
+        );
+        assert_eq!(
+            Range::new(0..=2).union(&Range::new(-2..=-1)),
+            [Range::new(-2..=2)]
+        );
     }
 }

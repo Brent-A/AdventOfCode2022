@@ -118,6 +118,12 @@ where
         }
     }
 
+    fn manhatten_distance(&self, other: &Self) -> Self::Unit {
+        let (h, _hdir) = self.horizontal_relative_to(other);
+        let (v, _vdir) = self.vertical_relative_to(other);
+        h + v
+    }
+
     fn project(&self, direction: Direction, distance: Self::Unit) -> Self {
         match direction {
             Direction::Up => Self::from_horz_vert(
