@@ -1,8 +1,7 @@
-use std::{collections::HashMap, hash::Hash, iter::Step, ops::Range};
+use std::{collections::HashMap, hash::Hash, iter::Step};
 
 use crate::{
     coordinate::{Coordinate, RectangularRange, RowCol, XY},
-    position::{Direction, Position},
     GetOrDefault,
 };
 

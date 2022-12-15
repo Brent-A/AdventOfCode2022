@@ -1,27 +1,28 @@
 [workspace]
 members = [
     "aoc",
-    "challenges/2021/day1",
-    "challenges/2021/day2",
-    "challenges/2021/day3",
-    "challenges/2022/day1",
-    "challenges/2022/day2",
-    "challenges/2022/day3",
-    "challenges/2022/day4",
-    "challenges/2022/day5",
-    "challenges/2022/day6",
-    "challenges/2022/day7",
-    "challenges/2022/day8",
-    "challenges/2022/day9",
-    "challenges/2022/day10",
-    "challenges/2022/day11",
-    "challenges/2022/day12",
-    "challenges/2022/day13",
+    # "challenges/2021/day1",
+    # "challenges/2021/day2",
+    # "challenges/2021/day3",
+    # "challenges/2022/day1",
+    # "challenges/2022/day2",
+    # "challenges/2022/day3",
+    # "challenges/2022/day4",
+    # "challenges/2022/day5",
+    # "challenges/2022/day6",
+    # "challenges/2022/day7",
+    # "challenges/2022/day8",
+    # "challenges/2022/day9",
+    # "challenges/2022/day10",
+    # "challenges/2022/day11",
+    # "challenges/2022/day12",
+    # "challenges/2022/day13",
     "challenges/2022/day14",
+    "challenges/2022/day15",
     "tools/aoc-prep",
 ]
 default-members = [
-    "challenges/2022/day14"
+    "challenges/2022/day15"
 ]
 
 [workspace.dependencies]

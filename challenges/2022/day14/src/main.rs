@@ -73,17 +73,7 @@ fn parse_input(input: &str) -> Grid<Tile, C> {
             let start = &corners[i - 1];
             let end = &corners[i];
 
-            let h = HorizontalRange::<C>::new(aoc::range::Range::new(
-                Unit::min(*start.horizontal(), *end.horizontal())
-                    ..=(Unit::max(*start.horizontal(), *end.horizontal())),
-            ));
-
-            let v = VerticalRange::<C>::new(aoc::range::Range::new(
-                Unit::min(*start.vertical(), *end.vertical())
-                    ..=(Unit::max(*start.vertical(), *end.vertical())),
-            ));
-
-            let r = RectangularRange::new(h, v);
+            let r = RectangularRange::from_points(&[start.clone(), end.clone()]);
 
             for c in r.iter() {
                 *map.get_mut_or_default(&c) = Tile::Rock;
@@ -119,12 +109,7 @@ fn part1(input: &str) -> String {
                         });
             */
 
-            let fall_options = [
-                sand.project(Direction::Down, 1),
-                sand.project(Direction::Down, 1).project(Direction::Left, 1),
-                sand.project(Direction::Down, 1)
-                    .project(Direction::Right, 1),
-            ];
+            let fall_options = [sand.down1(), sand.down1().left1(), sand.down1().right1()];
 
             let mut moved = false;
             for next in fall_options {

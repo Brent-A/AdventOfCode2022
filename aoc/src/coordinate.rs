@@ -1,8 +1,7 @@
 use std::{
-    borrow::Borrow,
     fmt::Display,
     iter::Step,
-    ops::{Add, Deref, DerefMut, RangeBounds, RangeInclusive, Sub},
+    ops::{Add, Deref, DerefMut, Sub},
 };
 
 use crate::position::Direction;
@@ -46,6 +45,31 @@ where
     }
     fn down(&self, distance: Self::Unit) -> Self {
         self.project(Direction::Down, distance)
+    }
+
+    fn left1(&self) -> Self
+    where
+        Self::Unit: From<u8>,
+    {
+        self.left(1.into())
+    }
+    fn right1(&self) -> Self
+    where
+        Self::Unit: From<u8>,
+    {
+        self.right(1.into())
+    }
+    fn up1(&self) -> Self
+    where
+        Self::Unit: From<u8>,
+    {
+        self.up(1.into())
+    }
+    fn down1(&self) -> Self
+    where
+        Self::Unit: From<u8>,
+    {
+        self.down(1.into())
     }
 
     fn horizontal_relative_to(&self, other: &Self) -> (Self::Unit, Direction) {
@@ -156,6 +180,21 @@ impl<C: Coordinate> RectangularRange<C> {
         Self {
             horizontal,
             vertical,
+        }
+    }
+
+    pub fn from_points(points: &[C]) -> Self
+    where
+        C::Unit: Ord,
+    {
+        let min_h = points.iter().map(|p| *p.horizontal()).min().unwrap();
+        let max_h = points.iter().map(|p| *p.horizontal()).max().unwrap();
+        let min_v = points.iter().map(|p| *p.vertical()).min().unwrap();
+        let max_v = points.iter().map(|p| *p.vertical()).max().unwrap();
+
+        Self {
+            horizontal: HorizontalRange::<C>::new(Range::new(min_h..=max_h)),
+            vertical: VerticalRange::<C>::new(Range::new(min_v..=max_v)),
         }
     }
 

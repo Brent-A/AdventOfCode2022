@@ -1,14 +1,11 @@
 #![feature(step_trait)]
 
-use std::{collections::HashMap, hash::Hash};
+use std::{collections::HashMap};
 
-use coordinate::Coordinate;
-use tilemap::TileMap;
 pub mod coordinate;
 pub mod grid;
 pub mod position;
 pub mod range;
-pub mod tilemap;
 
 pub fn load_input(base: &str, path: &str) -> String {
     let path = std::path::Path::new(base).join(path);
