@@ -1,0 +1,14 @@
+[package]
+name = "day16"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aoc = { workspace = true }
+serde = "*"
+serde_derive = "*"
+serde_scan = "*"
+scan_fmt = "*"
+nom = "7.1.1"

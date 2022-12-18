@@ -82,9 +82,9 @@ impl<T: Clone + PartialOrd> Range<T> {
     {
         match (&self.range, &other.range) {
             (None, None) => vec![],
-            (None, Some(o)) => vec![other.clone()],
-            (Some(s), None) => vec![self.clone()],
-            (Some(s), Some(o)) => {
+            (None, Some(_o)) => vec![other.clone()],
+            (Some(_s), None) => vec![self.clone()],
+            (Some(_s), Some(_o)) => {
                 let self_start = self.start().unwrap().clone();
                 let self_end = self.end().unwrap().clone();
                 let other_start = other.start().unwrap().clone();
